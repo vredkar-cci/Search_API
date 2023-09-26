@@ -122,11 +122,7 @@ async function fetchGitHubResults(keyword) {
   const apiUrl = `https://api.github.com/search/repositories?q=${keyword}&per_page=${maxResults}`;
 
 
-  await fetch(apiUrl, {
-    headers: {
-      Authorization: `token ${githubAccessToken}`
-    }
-  })
+  await fetch(apiUrl)
     .then(response => {
       if (!response.ok) {
         displayError('GitHub');
@@ -177,8 +173,6 @@ function createContainer(source) {
 
   const cardBody = document.createElement('div');
   cardBody.className = 'card-body';
-  // console.log(cardBody);
-
   let headerImg = '';
   switch (source) {
     case 'YouTube':

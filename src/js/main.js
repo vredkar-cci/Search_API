@@ -177,7 +177,6 @@ function createContainer(source) {
 
   const cardBody = document.createElement('div');
   cardBody.className = 'card-body';
-  // console.log(cardBody);
 
   let headerImg = '';
   switch (source) {

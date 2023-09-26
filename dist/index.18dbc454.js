@@ -667,7 +667,7 @@ async function searchGoogle(keyword) {
     });
 }
 async function fetchGitHubResults(keyword) {
-    const githubAccessToken = "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"; // Replace with your GitHub Access Token
+    const githubAccessToken = "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"; // Replace with your GitHub Access Token
     const apiUrl = `https://api.github.com/search/repositories?q=${keyword}&per_page=${maxResults}`;
     await fetch(apiUrl, {
         headers: {
@@ -710,7 +710,6 @@ function createContainer(source) {
     column.className = columnClass + " result-column";
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
-    // console.log(cardBody);
     let headerImg = "";
     switch(source){
         case "YouTube":

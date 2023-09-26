@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "source": "src/index.html",
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "parcel src/index.html"
+    "install": "npm install",
+    "start": "parcel",
+    "build": "parcel"
   },
   "keywords": [],
   "author": "",

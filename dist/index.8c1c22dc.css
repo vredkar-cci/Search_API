@@ -98,6 +98,7 @@ header svg {
   background-color: #fff;
   border-radius: 10px;
   width: 100%;
+  margin: 20px 0;
   padding: 25px 20px;
   box-shadow: 0 0 3px #0003;
 }

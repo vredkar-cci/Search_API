@@ -103,6 +103,7 @@ header {
     padding: 25px 20px;
     word-break: break-word;
     background-color: $white;
+    margin: 20px 0;
 
     @media (min-width: 992px) {
       width: calc(50% - 10px);

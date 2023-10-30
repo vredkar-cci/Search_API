@@ -142,7 +142,7 @@
       this[globalName] = mainExports;
     }
   }
-})({"a07NA":[function(require,module,exports) {
+})({"gEwwu":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
@@ -574,17 +574,8 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"1SICI":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _iconYoutubePng = require("../images/icon-youtube.png");
-var _iconYoutubePngDefault = parcelHelpers.interopDefault(_iconYoutubePng);
-var _iconStackoverflowPng = require("../images/icon-stackoverflow.png");
-var _iconStackoverflowPngDefault = parcelHelpers.interopDefault(_iconStackoverflowPng);
-var _iconGooglePng = require("../images/icon-google.png");
-var _iconGooglePngDefault = parcelHelpers.interopDefault(_iconGooglePng);
-var _iconGithubPng = require("../images/icon-github.png");
-var _iconGithubPngDefault = parcelHelpers.interopDefault(_iconGithubPng);
+var _searchKeyword = require("./searchKeyword");
 require("14e0fed9b263260b").config();
-const maxResults = 5; //Max number of results
 // Event listener for Enter key press
 document.getElementById("searchField").addEventListener("keyup", function(event) {
     if (event.key === "Enter") getSearchKeyword();
@@ -602,206 +593,16 @@ async function getSearchKeyword() {
     document.getElementById("errorMessage").textContent = "";
     document.getElementById("resultsContainer").innerHTML = "";
     // Fetch YouTube results
-    await searchYouTube(keyword);
+    await (0, _searchKeyword.searchYouTube)(keyword, "YouTube");
     // Fetch StackOverflow results
-    await searchStackOverflow(keyword);
+    await (0, _searchKeyword.searchStackOverflow)(keyword, "Stack Overflow");
     // Fetch Google results
-    await searchGoogle(keyword);
+    await (0, _searchKeyword.searchGoogle)(keyword, "Google");
     // Fetch GitHub results
-    await fetchGitHubResults(keyword);
-}
-// Example function to fetch data from YouTube API
-async function searchYouTube(keyword) {
-    const YouTubeAPIKey = "AIzaSyDy8tbNy4myL8Bdj-oV4iMQylVz5Cgiou0";
-    const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=${maxResults}&q=${keyword}&type=video&key=${YouTubeAPIKey}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) {
-            displayError("YouTube");
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        displayYouTubeResults(data.items, "YouTube");
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        displayError("YouTube");
-    });
-}
-async function searchStackOverflow(keyword) {
-    const apiUrl = `https://api.stackexchange.com/2.3/search/excerpts?pagesize=${maxResults}&order=desc&sort=relevance&q=${keyword}&site=stackoverflow`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) {
-            displayError("Stack Overflow");
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        displayStackOverflowResults(data.items, "Stack Overflow");
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        displayError("Stack Overflow");
-    });
-}
-async function searchGoogle(keyword) {
-    const googleApiKey = "AIzaSyC0fL3psvkke0LevaXrlB6qLeQi8xH-3pw";
-    const googleCx = "35f45271409164422"; // Replace with your Custom Search Engine ID
-    const apiUrl = `https://www.googleapis.com/customsearch/v1?q=${keyword}&key=${googleApiKey}&cx=${googleCx}&num=${maxResults}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) {
-            displayError("Google");
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        if (!data.items) data.items = [];
-        displayGoogleResults(data.items, "Google");
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        displayError("Google");
-    });
-}
-async function fetchGitHubResults(keyword) {
-    const githubAccessToken = "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"; // Replace with your GitHub Access Token
-    const apiUrl = `https://api.github.com/search/repositories?q=${keyword}&per_page=${maxResults}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) {
-            displayError("GitHub");
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        if (!data.items) data.items = [];
-        displayGitHubResults(data.items, "GitHub");
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        displayError("GitHub");
-    });
-}
-function generateCardHeader(headerImg, source) {
-    // Create a div, image, and title element
-    const cardHeader = document.createElement("div");
-    cardHeader.className = "card-header";
-    const img = document.createElement("img");
-    img.src = headerImg;
-    const title = document.createElement("h2");
-    title.textContent = source;
-    cardHeader.appendChild(img);
-    cardHeader.appendChild(title);
-    return cardHeader;
-}
-function createContainer(source) {
-    const resultsContainer = document.getElementById("resultsContainer");
-    const columnClass = source.toLowerCase().replace(/\s/g, "") + "-column";
-    const childColumn = resultsContainer.querySelector("." + columnClass);
-    if (childColumn) return childColumn; // Return is child already exists
-    const column = document.createElement("div");
-    column.className = columnClass + " result-column";
-    const cardBody = document.createElement("div");
-    cardBody.className = "card-body";
-    let headerImg = "";
-    switch(source){
-        case "YouTube":
-            headerImg = (0, _iconYoutubePngDefault.default);
-            break;
-        case "Stack Overflow":
-            headerImg = (0, _iconStackoverflowPngDefault.default);
-            break;
-        case "Google":
-            headerImg = (0, _iconGooglePngDefault.default);
-            break;
-        case "GitHub":
-            headerImg = (0, _iconGithubPngDefault.default);
-            break;
-        default:
-            console.log(source);
-    }
-    const cardHeader = generateCardHeader(headerImg, source);
-    column.appendChild(cardHeader);
-    column.appendChild(cardBody);
-    resultsContainer.appendChild(column);
-    return column;
-}
-function displayYouTubeResults(results, source) {
-    const column = createContainer(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        cardBody.innerHTML = "<p>No results found.</p>";
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let videoURL = `https://www.youtube.com/watch?v=${result.id.videoId}`, thumbnailImg = `${result.snippet.thumbnails.default.url}`, videoTitle = `${result.snippet.title}`, videoDescription = `${result.snippet.description}`;
-        card.innerHTML = `<a href='${videoURL}' target="_blank"><img src='${thumbnailImg}'></a>
-    <div><h3><a href='${videoURL}' target="_blank">${videoTitle}</a></h3><p>${videoDescription}</p></div>`;
-        column.appendChild(card);
-    });
-}
-function displayStackOverflowResults(results, source) {
-    const column = createContainer(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        cardBody.innerHTML = "<p>No results found.</p>";
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let questionID = result.question_id, question = result.title.replace(/[^a-zA-Z0-9\-_ ]/g, "").replace(/\s/g, "-"), questionURL = `https://stackoverflow.com/questions/${questionID}/${question}?r=SearchResults`, questionScore = result.question_score ? result.question_score + " votes" : "0 votes", answerCount = result.answer_count ? result.answer_count + " Answers" : "No Answer";
-        card.innerHTML = `<div class="info"><p><small>${questionScore}</small></p><p class='ans-count'>${answerCount}</p></div>
-                      <div><h3><a href="${questionURL}" target="_blank">${result.title}</a></h3><p>${result.excerpt}</p></div>`;
-        column.appendChild(card);
-    });
-}
-function displayGoogleResults(results, source) {
-    const column = createContainer(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        cardBody.innerHTML = "<p>No results found.</p>";
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        card.innerHTML = `<div><h3><a href='${result.htmlFormattedUrl}' target='_blank'>${result.htmlTitle}</a></h3><p>${result.htmlSnippet}</p><a href='${result.htmlFormattedUrl}' target='_blank'>${result.displayLink}</a></div>`;
-        column.appendChild(card);
-    });
-}
-function displayGitHubResults(results, source) {
-    const column = createContainer(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        cardBody.innerHTML = "<p>No results found.</p>";
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let language = result.language ? "Language: " + result.language : "";
-        card.innerHTML = `<div><p><a href='${result.html_url}' target='_blank'>${result.full_name}</a></p><p>${result.description}</p><p><small>${language}</small></p></div>`;
-        column.appendChild(card);
-    });
-}
-function displayError(source) {
-    const column = createContainer(source);
-    column.classList.add("has-error");
-    const cardBody = column.querySelector(".card-body");
-    cardBody.innerHTML = `<p>Some Error has Ocurred. Please try again later.</p>`;
+    await searchGitHub(keyword, "GitHub");
 }
 
-},{"14e0fed9b263260b":"lErsX","../images/icon-youtube.png":"jZ2Ee","../images/icon-stackoverflow.png":"2uH0f","../images/icon-google.png":"kHiKk","../images/icon-github.png":"4xgkS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lErsX":[function(require,module,exports) {
+},{"14e0fed9b263260b":"lErsX","./searchKeyword":"8yYQa"}],"lErsX":[function(require,module,exports) {
 var process = require("a81606b34c5d81aa");
 var Buffer = require("41bceb7eaaabbe41").Buffer;
 const fs = require("3cedb41afbfb34c8");
@@ -37284,7 +37085,312 @@ function randomFillSync(buf, offset, size) {
 },{"e52c82591caff1d7":"d5jf4","954d667c0302f12c":"eW7r9","7041a0e993c249ef":"8hjhE"}],"4QvE8":[function(require,module,exports) {
 module.exports = JSON.parse('{"name":"dotenv","version":"16.3.1","description":"Loads environment variables from .env file","main":"lib/main.js","types":"lib/main.d.ts","exports":{".":{"types":"./lib/main.d.ts","require":"./lib/main.js","default":"./lib/main.js"},"./config":"./config.js","./config.js":"./config.js","./lib/env-options":"./lib/env-options.js","./lib/env-options.js":"./lib/env-options.js","./lib/cli-options":"./lib/cli-options.js","./lib/cli-options.js":"./lib/cli-options.js","./package.json":"./package.json"},"scripts":{"dts-check":"tsc --project tests/types/tsconfig.json","lint":"standard","lint-readme":"standard-markdown","pretest":"npm run lint && npm run dts-check","test":"tap tests/*.js --100 -Rspec","prerelease":"npm test","release":"standard-version"},"repository":{"type":"git","url":"git://github.com/motdotla/dotenv.git"},"funding":"https://github.com/motdotla/dotenv?sponsor=1","keywords":["dotenv","env",".env","environment","variables","config","settings"],"readmeFilename":"README.md","license":"BSD-2-Clause","devDependencies":{"@definitelytyped/dtslint":"^0.0.133","@types/node":"^18.11.3","decache":"^4.6.1","sinon":"^14.0.1","standard":"^17.0.0","standard-markdown":"^7.1.0","standard-version":"^9.5.0","tap":"^16.3.0","tar":"^6.1.11","typescript":"^4.8.4"},"engines":{"node":">=12"},"browser":{"fs":false}}');
 
-},{}],"jZ2Ee":[function(require,module,exports) {
+},{}],"8yYQa":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "searchYouTube", ()=>searchYouTube);
+parcelHelpers.export(exports, "searchStackOverflow", ()=>searchStackOverflow);
+parcelHelpers.export(exports, "searchGoogle", ()=>searchGoogle);
+parcelHelpers.export(exports, "searchGitHub", ()=>searchGitHub);
+var _handleResultJs = require("./handleResult.js");
+var _displayUI = require("./displayUI");
+const maxResults = "10"; //Max number of results
+// Function to fetch data from YouTube API
+async function searchYouTube(keyword, source) {
+    const YouTubeAPIKey = "AIzaSyDy8tbNy4myL8Bdj-oV4iMQylVz5Cgiou0";
+    const YouTubeURL = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video";
+    const apiUrl = `${YouTubeURL}&maxResults=${maxResults}&q=${keyword}&key=${YouTubeAPIKey}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        (0, _handleResultJs.displayYouTubeResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+async function searchStackOverflow(keyword, source) {
+    const StackOverflowURL = "https://api.stackexchange.com/2.3/search/excerpts?order=desc&sort=relevance&site=stackoverflow";
+    const apiUrl = `${StackOverflowURL}&pagesize=${maxResults}&q=${keyword}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        (0, _handleResultJs.displayStackOverflowResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+async function searchGoogle(keyword, source) {
+    const googleApiKey = "AIzaSyC0fL3psvkke0LevaXrlB6qLeQi8xH-3pw";
+    const googleCx = "35f45271409164422"; // Replace with your Custom Search Engine ID
+    const GoogleURL = "https://www.googleapis.com/customsearch/v1?";
+    const apiUrl = `${GoogleURL}q=${keyword}&key=${googleApiKey}&cx=${googleCx}&num=${maxResults}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        if (!data.items) data.items = [];
+        (0, _handleResultJs.displayGoogleResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+async function searchGitHub(keyword, source) {
+    const GitHubURL = "https://api.github.com/search/repositories?";
+    const apiUrl = `${GitHubURL}q=${keyword}&per_page=${maxResults}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        if (!data.items) data.items = [];
+        (0, _handleResultJs.displayGitHubResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+
+},{"./handleResult.js":"1AF4Y","./displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1AF4Y":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayYouTubeResults", ()=>displayYouTubeResults);
+parcelHelpers.export(exports, "displayStackOverflowResults", ()=>displayStackOverflowResults);
+parcelHelpers.export(exports, "displayGoogleResults", ()=>displayGoogleResults);
+parcelHelpers.export(exports, "displayGitHubResults", ()=>displayGitHubResults);
+var _displayUI = require("./displayUI");
+function displayYouTubeResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let videoURL = `https://www.youtube.com/watch?v=${result.id.videoId}`, thumbnailImg = `${result.snippet.thumbnails.default.url}`, videoTitle = `${result.snippet.title}`, videoDescription = `${result.snippet.description}`;
+        const link = document.createElement("a");
+        link.href = videoURL;
+        link.target = "_blank";
+        const image = document.createElement("img");
+        image.src = thumbnailImg;
+        link.appendChild(image);
+        card.appendChild(link);
+        const contentDiv = document.createElement("div");
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = videoURL;
+        titleLink.target = "_blank";
+        titleLink.textContent = videoTitle;
+        titleHeading.appendChild(titleLink);
+        const descriptionParagraph = document.createElement("p");
+        descriptionParagraph.textContent = videoDescription;
+        contentDiv.appendChild(titleHeading);
+        contentDiv.appendChild(descriptionParagraph);
+        card.appendChild(contentDiv);
+        column.appendChild(card);
+    });
+}
+function displayStackOverflowResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let questionID = result.question_id, question = result.title.replace(/[^a-zA-Z0-9\-_ ]/g, "").replace(/\s/g, "-"), questionURL = `https://stackoverflow.com/questions/${questionID}/${question}?r=SearchResults`, questionScore = result.question_score ? result.question_score + " votes" : "0 votes", answerCount = result.answer_count ? result.answer_count + " Answers" : "No Answer";
+        // Create the first <div class="info">
+        const infoDiv = document.createElement("div");
+        infoDiv.classList.add("info");
+        const smallParagraph = document.createElement("p");
+        const smallText = document.createElement("small");
+        smallText.textContent = questionScore;
+        smallParagraph.appendChild(smallText);
+        const answerCountParagraph = document.createElement("p");
+        answerCountParagraph.classList.add("ans-count");
+        answerCountParagraph.textContent = answerCount;
+        infoDiv.appendChild(smallParagraph);
+        infoDiv.appendChild(answerCountParagraph);
+        // Create the second <div> for the title and excerpt
+        const mainContentDiv = document.createElement("div");
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = questionURL;
+        titleLink.target = "_blank";
+        titleLink.textContent = result.title;
+        titleHeading.appendChild(titleLink);
+        const excerptParagraph = document.createElement("p");
+        excerptParagraph.textContent = result.excerpt;
+        mainContentDiv.appendChild(titleHeading);
+        mainContentDiv.appendChild(excerptParagraph);
+        card.appendChild(infoDiv);
+        card.appendChild(mainContentDiv);
+        column.appendChild(card);
+    });
+}
+function displayGoogleResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        // Create a new <div> element
+        const cardContent = document.createElement("div");
+        // Create an <h3> element for the title
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = result.htmlFormattedUrl;
+        titleLink.target = "_blank";
+        titleLink.textContent = result.htmlTitle;
+        titleHeading.appendChild(titleLink);
+        // Create a <p> element for the snippet
+        const snippetParagraph = document.createElement("p");
+        snippetParagraph.textContent = result.htmlSnippet;
+        // Create another <a> element
+        const link = document.createElement("a");
+        link.href = result.htmlFormattedUrl;
+        link.target = "_blank";
+        link.textContent = result.displayLink;
+        // Append the created elements to the cardContent
+        cardContent.appendChild(titleHeading);
+        cardContent.appendChild(snippetParagraph);
+        cardContent.appendChild(link);
+        // Append the cardContent to the 'card' element
+        card.appendChild(cardContent);
+        column.appendChild(card);
+    });
+}
+function displayGitHubResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let language = result.language ? "Language: " + result.language : "";
+        // Create a new <div> element
+        const cardContent = document.createElement("div");
+        // Create the <p> element for the link
+        const linkParagraph = document.createElement("p");
+        const link = document.createElement("a");
+        link.href = result.html_url;
+        link.target = "_blank";
+        link.textContent = result.full_name;
+        linkParagraph.appendChild(link);
+        // Create the <p> element for the description
+        const descriptionParagraph = document.createElement("p");
+        descriptionParagraph.textContent = result.description;
+        // Create the <p> element for the language
+        const languageParagraph = document.createElement("p");
+        const small = document.createElement("small");
+        small.textContent = language;
+        languageParagraph.appendChild(small);
+        // Append the created elements to the cardContent
+        cardContent.appendChild(linkParagraph);
+        cardContent.appendChild(descriptionParagraph);
+        cardContent.appendChild(languageParagraph);
+        // Append the cardContent to the 'card' element
+        card.appendChild(cardContent);
+        column.appendChild(card);
+    });
+}
+
+},{"./displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gTqOq":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "createContainer", ()=>createContainer);
+parcelHelpers.export(exports, "displayError", ()=>displayError);
+var _iconYoutubePng = require("../images/icon-youtube.png");
+var _iconYoutubePngDefault = parcelHelpers.interopDefault(_iconYoutubePng);
+var _iconStackoverflowPng = require("../images/icon-stackoverflow.png");
+var _iconStackoverflowPngDefault = parcelHelpers.interopDefault(_iconStackoverflowPng);
+var _iconGooglePng = require("../images/icon-google.png");
+var _iconGooglePngDefault = parcelHelpers.interopDefault(_iconGooglePng);
+var _iconGithubPng = require("../images/icon-github.png");
+var _iconGithubPngDefault = parcelHelpers.interopDefault(_iconGithubPng);
+function generateCardHeader(headerImg, source) {
+    // Create a div, image, and title element
+    const cardHeader = document.createElement("div");
+    cardHeader.className = "card-header";
+    const img = document.createElement("img");
+    img.src = headerImg;
+    const title = document.createElement("h2");
+    title.textContent = source;
+    cardHeader.appendChild(img);
+    cardHeader.appendChild(title);
+    return cardHeader;
+}
+function createContainer(source) {
+    const resultsContainer = document.getElementById("resultsContainer");
+    const columnClass = source.toLowerCase().replace(/\s/g, "") + "-column";
+    const childColumn = resultsContainer.querySelector("." + columnClass);
+    if (childColumn) return childColumn; // Return is child already exists
+    const column = document.createElement("div");
+    column.className = columnClass + " result-column";
+    const cardBody = document.createElement("div");
+    cardBody.className = "card-body";
+    let headerImg = "";
+    switch(source){
+        case "YouTube":
+            headerImg = (0, _iconYoutubePngDefault.default);
+            break;
+        case "Stack Overflow":
+            headerImg = (0, _iconStackoverflowPngDefault.default);
+            break;
+        case "Google":
+            headerImg = (0, _iconGooglePngDefault.default);
+            break;
+        case "GitHub":
+            headerImg = (0, _iconGithubPngDefault.default);
+            break;
+        default:
+            console.log(source);
+    }
+    const cardHeader = generateCardHeader(headerImg, source);
+    column.appendChild(cardHeader);
+    column.appendChild(cardBody);
+    resultsContainer.appendChild(column);
+    return column;
+}
+function displayError(source) {
+    const column = createContainer(source);
+    column.classList.add("has-error");
+    const cardBody = column.querySelector(".card-body");
+    const textNode = document.createTextNode("Some Error has Ocurred. Please try again later.");
+    cardBody.appendChild(textNode);
+}
+
+},{"../images/icon-youtube.png":"jZ2Ee","../images/icon-stackoverflow.png":"2uH0f","../images/icon-google.png":"kHiKk","../images/icon-github.png":"4xgkS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jZ2Ee":[function(require,module,exports) {
 module.exports = require("d4665ecf6757f212").getBundleURL("10Mjw") + "icon-youtube.20193d2e.png" + "?" + Date.now();
 
 },{"d4665ecf6757f212":"lgJ39"}],"lgJ39":[function(require,module,exports) {
@@ -37361,6 +37467,6 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["a07NA","1SICI"], "1SICI", "parcelRequire00da")
+},{}]},["gEwwu","1SICI"], "1SICI", "parcelRequire00da")
 
 //# sourceMappingURL=index.18dbc454.js.map

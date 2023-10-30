@@ -45,7 +45,7 @@ input {
 }
 
 .container {
-  max-width: 1280px;
+  max-width: 1580px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -61,6 +61,8 @@ header svg {
 
 .input-group {
   flex-wrap: wrap;
+  max-width: 700px;
+  margin: 0 auto;
   display: flex;
   position: relative;
 }

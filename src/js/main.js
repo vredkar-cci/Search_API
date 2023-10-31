@@ -1,4 +1,7 @@
-import { searchYouTube, searchStackOverflow, searchGoogle, fetchGitHubResults } from "./searchKeyword"
+import { searchYouTube } from "./fetchAPI/fetchYouTubeAPI";
+import { searchStackOverflow } from "./fetchAPI/fetchStackOverflowAPI";
+import { searchGoogle } from "./fetchAPI/fetchGoogleAPI ";
+import { searchGitHub } from "./fetchAPI/fetchGitHubAPI";
 
 require('dotenv').config();
 

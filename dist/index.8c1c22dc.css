@@ -8,7 +8,8 @@ body {
 }
 
 h1 {
-  font-size: 24px;
+  margin-bottom: 5px;
+  font-size: 22px;
 }
 
 h2 {
@@ -101,7 +102,7 @@ header svg {
   border-radius: 10px;
   width: 100%;
   margin: 20px 0;
-  padding: 25px 20px;
+  padding: 15px 20px;
   box-shadow: 0 0 3px #0003;
 }
 
@@ -119,7 +120,7 @@ header svg {
   align-items: center;
   width: 100%;
   margin-bottom: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 15px;
   display: flex;
 }
 

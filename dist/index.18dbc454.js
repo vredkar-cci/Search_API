@@ -574,7 +574,10 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"1SICI":[function(require,module,exports) {
-var _searchKeyword = require("./searchKeyword");
+var _fetchYouTubeAPI = require("./fetchAPI/fetchYouTubeAPI");
+var _fetchStackOverflowAPI = require("./fetchAPI/fetchStackOverflowAPI");
+var _fetchGoogleAPI = require("./fetchAPI/fetchGoogleAPI ");
+var _fetchGitHubAPI = require("./fetchAPI/fetchGitHubAPI");
 require("14e0fed9b263260b").config();
 // Event listener for Enter key press
 document.getElementById("searchField").addEventListener("keyup", function(event) {
@@ -593,16 +596,437 @@ async function getSearchKeyword() {
     document.getElementById("errorMessage").textContent = "";
     document.getElementById("resultsContainer").innerHTML = "";
     // Fetch YouTube results
-    await (0, _searchKeyword.searchYouTube)(keyword, "YouTube");
+    await (0, _fetchYouTubeAPI.searchYouTube)(keyword, "YouTube");
     // Fetch StackOverflow results
-    await (0, _searchKeyword.searchStackOverflow)(keyword, "Stack Overflow");
+    await (0, _fetchStackOverflowAPI.searchStackOverflow)(keyword, "Stack Overflow");
     // Fetch Google results
-    await (0, _searchKeyword.searchGoogle)(keyword, "Google");
+    await (0, _fetchGoogleAPI.searchGoogle)(keyword, "Google");
     // Fetch GitHub results
-    await searchGitHub(keyword, "GitHub");
+    await (0, _fetchGitHubAPI.searchGitHub)(keyword, "GitHub");
 }
 
-},{"14e0fed9b263260b":"lErsX","./searchKeyword":"8yYQa"}],"lErsX":[function(require,module,exports) {
+},{"./fetchAPI/fetchYouTubeAPI":"9Ykr6","./fetchAPI/fetchStackOverflowAPI":"1HsG3","./fetchAPI/fetchGoogleAPI ":"jMNL1","./fetchAPI/fetchGitHubAPI":"8gK6b","14e0fed9b263260b":"lErsX"}],"9Ykr6":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "searchYouTube", ()=>searchYouTube);
+var _youTubeResult = require("../handleResult/YouTubeResult");
+var _displayUI = require("../displayUI");
+const maxResults = "10"; //Max number of results
+// Function to fetch data from YouTube API
+async function searchYouTube(keyword, source) {
+    const YouTubeAPIKey = "AIzaSyDy8tbNy4myL8Bdj-oV4iMQylVz5Cgiou0";
+    const YouTubeURL = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video";
+    const apiUrl = `${YouTubeURL}&maxResults=${maxResults}&q=${keyword}&key=${YouTubeAPIKey}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        (0, _youTubeResult.displayYouTubeResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+
+},{"../handleResult/YouTubeResult":"3MYkS","../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3MYkS":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayYouTubeResults", ()=>displayYouTubeResults);
+var _displayUI = require("../displayUI");
+function displayYouTubeResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let videoURL = `https://www.youtube.com/watch?v=${result.id.videoId}`, thumbnailImg = `${result.snippet.thumbnails.default.url}`, videoTitle = `${result.snippet.title}`, videoDescription = `${result.snippet.description}`;
+        const link = document.createElement("a");
+        link.href = videoURL;
+        link.target = "_blank";
+        const image = document.createElement("img");
+        image.src = thumbnailImg;
+        link.appendChild(image);
+        card.appendChild(link);
+        const contentDiv = document.createElement("div");
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = videoURL;
+        titleLink.target = "_blank";
+        titleLink.textContent = videoTitle;
+        titleHeading.appendChild(titleLink);
+        const descriptionParagraph = document.createElement("p");
+        descriptionParagraph.textContent = videoDescription;
+        contentDiv.appendChild(titleHeading);
+        contentDiv.appendChild(descriptionParagraph);
+        card.appendChild(contentDiv);
+        column.appendChild(card);
+    });
+}
+
+},{"../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gTqOq":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "createContainer", ()=>createContainer);
+parcelHelpers.export(exports, "displayError", ()=>displayError);
+var _iconYoutubePng = require("../images/icon-youtube.png");
+var _iconYoutubePngDefault = parcelHelpers.interopDefault(_iconYoutubePng);
+var _iconStackoverflowPng = require("../images/icon-stackoverflow.png");
+var _iconStackoverflowPngDefault = parcelHelpers.interopDefault(_iconStackoverflowPng);
+var _iconGooglePng = require("../images/icon-google.png");
+var _iconGooglePngDefault = parcelHelpers.interopDefault(_iconGooglePng);
+var _iconGithubPng = require("../images/icon-github.png");
+var _iconGithubPngDefault = parcelHelpers.interopDefault(_iconGithubPng);
+function generateCardHeader(headerImg, source) {
+    // Create a div, image, and title element
+    const cardHeader = document.createElement("div");
+    cardHeader.className = "card-header";
+    const img = document.createElement("img");
+    img.src = headerImg;
+    const title = document.createElement("h2");
+    title.textContent = source;
+    cardHeader.appendChild(img);
+    cardHeader.appendChild(title);
+    return cardHeader;
+}
+function createContainer(source) {
+    const resultsContainer = document.getElementById("resultsContainer");
+    const columnClass = source.toLowerCase().replace(/\s/g, "") + "-column";
+    const childColumn = resultsContainer.querySelector("." + columnClass);
+    if (childColumn) return childColumn; // Return is child already exists
+    const column = document.createElement("div");
+    column.className = columnClass + " result-column";
+    const cardBody = document.createElement("div");
+    cardBody.className = "card-body";
+    let headerImg = "";
+    switch(source){
+        case "YouTube":
+            headerImg = (0, _iconYoutubePngDefault.default);
+            break;
+        case "Stack Overflow":
+            headerImg = (0, _iconStackoverflowPngDefault.default);
+            break;
+        case "Google":
+            headerImg = (0, _iconGooglePngDefault.default);
+            break;
+        case "GitHub":
+            headerImg = (0, _iconGithubPngDefault.default);
+            break;
+        default:
+            console.log(source);
+    }
+    const cardHeader = generateCardHeader(headerImg, source);
+    column.appendChild(cardHeader);
+    column.appendChild(cardBody);
+    resultsContainer.appendChild(column);
+    return column;
+}
+function displayError(source) {
+    const column = createContainer(source);
+    column.classList.add("has-error");
+    const cardBody = column.querySelector(".card-body");
+    const textNode = document.createTextNode("Some Error has Ocurred. Please try again later.");
+    cardBody.appendChild(textNode);
+}
+
+},{"../images/icon-youtube.png":"jZ2Ee","../images/icon-stackoverflow.png":"2uH0f","../images/icon-google.png":"kHiKk","../images/icon-github.png":"4xgkS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jZ2Ee":[function(require,module,exports) {
+module.exports = require("d4665ecf6757f212").getBundleURL("10Mjw") + "icon-youtube.20193d2e.png" + "?" + Date.now();
+
+},{"d4665ecf6757f212":"lgJ39"}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+}
+// TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"2uH0f":[function(require,module,exports) {
+module.exports = require("521483d2b91fd2b2").getBundleURL("10Mjw") + "icon-stackoverflow.823e1f81.png" + "?" + Date.now();
+
+},{"521483d2b91fd2b2":"lgJ39"}],"kHiKk":[function(require,module,exports) {
+module.exports = require("3f705dc280eda790").getBundleURL("10Mjw") + "icon-google.1ec244d5.png" + "?" + Date.now();
+
+},{"3f705dc280eda790":"lgJ39"}],"4xgkS":[function(require,module,exports) {
+module.exports = require("9f8d874a161d71eb").getBundleURL("10Mjw") + "icon-github.4e196431.png" + "?" + Date.now();
+
+},{"9f8d874a161d71eb":"lgJ39"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, "__esModule", {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
+
+},{}],"1HsG3":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "searchStackOverflow", ()=>searchStackOverflow);
+var _stackOverflowResult = require("../handleResult/StackOverflowResult");
+var _displayUI = require("../displayUI");
+const maxResults = "10"; //Max number of results
+// Function to fetch data from YouTube API
+async function searchStackOverflow(keyword, source) {
+    const StackOverflowURL = "https://api.stackexchange.com/2.3/search/excerpts?order=desc&sort=relevance&site=stackoverflow";
+    const apiUrl = `${StackOverflowURL}&pagesize=${maxResults}&q=${keyword}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        (0, _stackOverflowResult.displayStackOverflowResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+
+},{"../handleResult/StackOverflowResult":"hH9SD","../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hH9SD":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayStackOverflowResults", ()=>displayStackOverflowResults);
+var _displayUI = require("../displayUI");
+function displayStackOverflowResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let questionID = result.question_id, question = result.title.replace(/[^a-zA-Z0-9\-_ ]/g, "").replace(/\s/g, "-"), questionURL = `https://stackoverflow.com/questions/${questionID}/${question}?r=SearchResults`, questionScore = result.question_score ? result.question_score + " votes" : "0 votes", answerCount = result.answer_count ? result.answer_count + " Answers" : "No Answer";
+        // Create the first <div class="info">
+        const infoDiv = document.createElement("div");
+        infoDiv.classList.add("info");
+        const smallParagraph = document.createElement("p");
+        const smallText = document.createElement("small");
+        smallText.textContent = questionScore;
+        smallParagraph.appendChild(smallText);
+        const answerCountParagraph = document.createElement("p");
+        answerCountParagraph.classList.add("ans-count");
+        answerCountParagraph.textContent = answerCount;
+        infoDiv.appendChild(smallParagraph);
+        infoDiv.appendChild(answerCountParagraph);
+        // Create the second <div> for the title and excerpt
+        const mainContentDiv = document.createElement("div");
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = questionURL;
+        titleLink.target = "_blank";
+        titleLink.textContent = result.title;
+        titleHeading.appendChild(titleLink);
+        const excerptParagraph = document.createElement("p");
+        excerptParagraph.textContent = result.excerpt;
+        mainContentDiv.appendChild(titleHeading);
+        mainContentDiv.appendChild(excerptParagraph);
+        card.appendChild(infoDiv);
+        card.appendChild(mainContentDiv);
+        column.appendChild(card);
+    });
+}
+
+},{"../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jMNL1":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "searchGoogle", ()=>searchGoogle);
+var _googleResult = require("../handleResult/GoogleResult");
+var _displayUI = require("../displayUI");
+const maxResults = "10"; //Max number of results
+// Function to fetch data from YouTube API
+async function searchGoogle(keyword, source) {
+    const googleApiKey = "AIzaSyC0fL3psvkke0LevaXrlB6qLeQi8xH-3pw";
+    const googleCx = "35f45271409164422"; // Replace with your Custom Search Engine ID
+    const GoogleURL = "https://www.googleapis.com/customsearch/v1?";
+    const apiUrl = `${GoogleURL}q=${keyword}&key=${googleApiKey}&cx=${googleCx}&num=${maxResults}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        if (!data.items) data.items = [];
+        (0, _googleResult.displayGoogleResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+
+},{"../handleResult/GoogleResult":"ltBkX","../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ltBkX":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayGoogleResults", ()=>displayGoogleResults);
+var _displayUI = require("../displayUI");
+function displayGoogleResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        // Create a new <div> element
+        const cardContent = document.createElement("div");
+        // Create an <h3> element for the title
+        const titleHeading = document.createElement("h3");
+        const titleLink = document.createElement("a");
+        titleLink.href = result.htmlFormattedUrl;
+        titleLink.target = "_blank";
+        titleLink.textContent = result.htmlTitle;
+        titleHeading.appendChild(titleLink);
+        // Create a <p> element for the snippet
+        const snippetParagraph = document.createElement("p");
+        snippetParagraph.textContent = result.htmlSnippet;
+        // Create another <a> element
+        const link = document.createElement("a");
+        link.href = result.htmlFormattedUrl;
+        link.target = "_blank";
+        link.textContent = result.displayLink;
+        // Append the created elements to the cardContent
+        cardContent.appendChild(titleHeading);
+        cardContent.appendChild(snippetParagraph);
+        cardContent.appendChild(link);
+        // Append the cardContent to the 'card' element
+        card.appendChild(cardContent);
+        column.appendChild(card);
+    });
+}
+
+},{"../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8gK6b":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "searchGitHub", ()=>searchGitHub);
+var _gitHubResult = require("../handleResult/GitHubResult");
+var _displayUI = require("../displayUI");
+const maxResults = "10"; //Max number of results
+// Function to fetch data from YouTube API
+async function searchGitHub(keyword, source) {
+    const GitHubURL = "https://api.github.com/search/repositories?";
+    const apiUrl = `${GitHubURL}q=${keyword}&per_page=${maxResults}`;
+    await fetch(apiUrl).then((response)=>{
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    }).then((data)=>{
+        // Process and use the data
+        if (!data.items) data.items = [];
+        (0, _gitHubResult.displayGitHubResults)(data.items, source);
+    }).catch((error)=>{
+        // Handle any errors that occurred during the fetch or data processing
+        console.error("Fetch Error:", error);
+        (0, _displayUI.displayError)(source);
+    });
+}
+
+},{"../handleResult/GitHubResult":"1EEs3","../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1EEs3":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "displayGitHubResults", ()=>displayGitHubResults);
+var _displayUI = require("../displayUI");
+function displayGitHubResults(results, source) {
+    const column = (0, _displayUI.createContainer)(source);
+    if (results.length === 0) {
+        column.classList.add("has-error");
+        const cardBody = column.querySelector(".card-body");
+        const textNode = document.createTextNode("No results found.");
+        cardBody.appendChild(textNode);
+        return;
+    }
+    results.forEach((result)=>{
+        const card = document.createElement("div");
+        card.className = "result-card";
+        let language = result.language ? "Language: " + result.language : "";
+        // Create a new <div> element
+        const cardContent = document.createElement("div");
+        // Create the <p> element for the link
+        const linkParagraph = document.createElement("p");
+        const link = document.createElement("a");
+        link.href = result.html_url;
+        link.target = "_blank";
+        link.textContent = result.full_name;
+        linkParagraph.appendChild(link);
+        // Create the <p> element for the description
+        const descriptionParagraph = document.createElement("p");
+        descriptionParagraph.textContent = result.description;
+        // Create the <p> element for the language
+        const languageParagraph = document.createElement("p");
+        const small = document.createElement("small");
+        small.textContent = language;
+        languageParagraph.appendChild(small);
+        // Append the created elements to the cardContent
+        cardContent.appendChild(linkParagraph);
+        cardContent.appendChild(descriptionParagraph);
+        cardContent.appendChild(languageParagraph);
+        // Append the cardContent to the 'card' element
+        card.appendChild(cardContent);
+        column.appendChild(card);
+    });
+}
+
+},{"../displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lErsX":[function(require,module,exports) {
 var process = require("a81606b34c5d81aa");
 var Buffer = require("41bceb7eaaabbe41").Buffer;
 const fs = require("3cedb41afbfb34c8");
@@ -37084,388 +37508,6 @@ function randomFillSync(buf, offset, size) {
 
 },{"e52c82591caff1d7":"d5jf4","954d667c0302f12c":"eW7r9","7041a0e993c249ef":"8hjhE"}],"4QvE8":[function(require,module,exports) {
 module.exports = JSON.parse('{"name":"dotenv","version":"16.3.1","description":"Loads environment variables from .env file","main":"lib/main.js","types":"lib/main.d.ts","exports":{".":{"types":"./lib/main.d.ts","require":"./lib/main.js","default":"./lib/main.js"},"./config":"./config.js","./config.js":"./config.js","./lib/env-options":"./lib/env-options.js","./lib/env-options.js":"./lib/env-options.js","./lib/cli-options":"./lib/cli-options.js","./lib/cli-options.js":"./lib/cli-options.js","./package.json":"./package.json"},"scripts":{"dts-check":"tsc --project tests/types/tsconfig.json","lint":"standard","lint-readme":"standard-markdown","pretest":"npm run lint && npm run dts-check","test":"tap tests/*.js --100 -Rspec","prerelease":"npm test","release":"standard-version"},"repository":{"type":"git","url":"git://github.com/motdotla/dotenv.git"},"funding":"https://github.com/motdotla/dotenv?sponsor=1","keywords":["dotenv","env",".env","environment","variables","config","settings"],"readmeFilename":"README.md","license":"BSD-2-Clause","devDependencies":{"@definitelytyped/dtslint":"^0.0.133","@types/node":"^18.11.3","decache":"^4.6.1","sinon":"^14.0.1","standard":"^17.0.0","standard-markdown":"^7.1.0","standard-version":"^9.5.0","tap":"^16.3.0","tar":"^6.1.11","typescript":"^4.8.4"},"engines":{"node":">=12"},"browser":{"fs":false}}');
-
-},{}],"8yYQa":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "searchYouTube", ()=>searchYouTube);
-parcelHelpers.export(exports, "searchStackOverflow", ()=>searchStackOverflow);
-parcelHelpers.export(exports, "searchGoogle", ()=>searchGoogle);
-parcelHelpers.export(exports, "searchGitHub", ()=>searchGitHub);
-var _handleResultJs = require("./handleResult.js");
-var _displayUI = require("./displayUI");
-const maxResults = "10"; //Max number of results
-// Function to fetch data from YouTube API
-async function searchYouTube(keyword, source) {
-    const YouTubeAPIKey = "AIzaSyDy8tbNy4myL8Bdj-oV4iMQylVz5Cgiou0";
-    const YouTubeURL = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video";
-    const apiUrl = `${YouTubeURL}&maxResults=${maxResults}&q=${keyword}&key=${YouTubeAPIKey}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        (0, _handleResultJs.displayYouTubeResults)(data.items, source);
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        (0, _displayUI.displayError)(source);
-    });
-}
-async function searchStackOverflow(keyword, source) {
-    const StackOverflowURL = "https://api.stackexchange.com/2.3/search/excerpts?order=desc&sort=relevance&site=stackoverflow";
-    const apiUrl = `${StackOverflowURL}&pagesize=${maxResults}&q=${keyword}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        (0, _handleResultJs.displayStackOverflowResults)(data.items, source);
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        (0, _displayUI.displayError)(source);
-    });
-}
-async function searchGoogle(keyword, source) {
-    const googleApiKey = "AIzaSyC0fL3psvkke0LevaXrlB6qLeQi8xH-3pw";
-    const googleCx = "35f45271409164422"; // Replace with your Custom Search Engine ID
-    const GoogleURL = "https://www.googleapis.com/customsearch/v1?";
-    const apiUrl = `${GoogleURL}q=${keyword}&key=${googleApiKey}&cx=${googleCx}&num=${maxResults}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        if (!data.items) data.items = [];
-        (0, _handleResultJs.displayGoogleResults)(data.items, source);
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        (0, _displayUI.displayError)(source);
-    });
-}
-async function searchGitHub(keyword, source) {
-    const GitHubURL = "https://api.github.com/search/repositories?";
-    const apiUrl = `${GitHubURL}q=${keyword}&per_page=${maxResults}`;
-    await fetch(apiUrl).then((response)=>{
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    }).then((data)=>{
-        // Process and use the data
-        if (!data.items) data.items = [];
-        (0, _handleResultJs.displayGitHubResults)(data.items, source);
-    }).catch((error)=>{
-        // Handle any errors that occurred during the fetch or data processing
-        console.error("Fetch Error:", error);
-        (0, _displayUI.displayError)(source);
-    });
-}
-
-},{"./handleResult.js":"1AF4Y","./displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1AF4Y":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "displayYouTubeResults", ()=>displayYouTubeResults);
-parcelHelpers.export(exports, "displayStackOverflowResults", ()=>displayStackOverflowResults);
-parcelHelpers.export(exports, "displayGoogleResults", ()=>displayGoogleResults);
-parcelHelpers.export(exports, "displayGitHubResults", ()=>displayGitHubResults);
-var _displayUI = require("./displayUI");
-function displayYouTubeResults(results, source) {
-    const column = (0, _displayUI.createContainer)(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        const textNode = document.createTextNode("No results found.");
-        cardBody.appendChild(textNode);
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let videoURL = `https://www.youtube.com/watch?v=${result.id.videoId}`, thumbnailImg = `${result.snippet.thumbnails.default.url}`, videoTitle = `${result.snippet.title}`, videoDescription = `${result.snippet.description}`;
-        const link = document.createElement("a");
-        link.href = videoURL;
-        link.target = "_blank";
-        const image = document.createElement("img");
-        image.src = thumbnailImg;
-        link.appendChild(image);
-        card.appendChild(link);
-        const contentDiv = document.createElement("div");
-        const titleHeading = document.createElement("h3");
-        const titleLink = document.createElement("a");
-        titleLink.href = videoURL;
-        titleLink.target = "_blank";
-        titleLink.textContent = videoTitle;
-        titleHeading.appendChild(titleLink);
-        const descriptionParagraph = document.createElement("p");
-        descriptionParagraph.textContent = videoDescription;
-        contentDiv.appendChild(titleHeading);
-        contentDiv.appendChild(descriptionParagraph);
-        card.appendChild(contentDiv);
-        column.appendChild(card);
-    });
-}
-function displayStackOverflowResults(results, source) {
-    const column = (0, _displayUI.createContainer)(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        const textNode = document.createTextNode("No results found.");
-        cardBody.appendChild(textNode);
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let questionID = result.question_id, question = result.title.replace(/[^a-zA-Z0-9\-_ ]/g, "").replace(/\s/g, "-"), questionURL = `https://stackoverflow.com/questions/${questionID}/${question}?r=SearchResults`, questionScore = result.question_score ? result.question_score + " votes" : "0 votes", answerCount = result.answer_count ? result.answer_count + " Answers" : "No Answer";
-        // Create the first <div class="info">
-        const infoDiv = document.createElement("div");
-        infoDiv.classList.add("info");
-        const smallParagraph = document.createElement("p");
-        const smallText = document.createElement("small");
-        smallText.textContent = questionScore;
-        smallParagraph.appendChild(smallText);
-        const answerCountParagraph = document.createElement("p");
-        answerCountParagraph.classList.add("ans-count");
-        answerCountParagraph.textContent = answerCount;
-        infoDiv.appendChild(smallParagraph);
-        infoDiv.appendChild(answerCountParagraph);
-        // Create the second <div> for the title and excerpt
-        const mainContentDiv = document.createElement("div");
-        const titleHeading = document.createElement("h3");
-        const titleLink = document.createElement("a");
-        titleLink.href = questionURL;
-        titleLink.target = "_blank";
-        titleLink.textContent = result.title;
-        titleHeading.appendChild(titleLink);
-        const excerptParagraph = document.createElement("p");
-        excerptParagraph.textContent = result.excerpt;
-        mainContentDiv.appendChild(titleHeading);
-        mainContentDiv.appendChild(excerptParagraph);
-        card.appendChild(infoDiv);
-        card.appendChild(mainContentDiv);
-        column.appendChild(card);
-    });
-}
-function displayGoogleResults(results, source) {
-    const column = (0, _displayUI.createContainer)(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        const textNode = document.createTextNode("No results found.");
-        cardBody.appendChild(textNode);
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        // Create a new <div> element
-        const cardContent = document.createElement("div");
-        // Create an <h3> element for the title
-        const titleHeading = document.createElement("h3");
-        const titleLink = document.createElement("a");
-        titleLink.href = result.htmlFormattedUrl;
-        titleLink.target = "_blank";
-        titleLink.textContent = result.htmlTitle;
-        titleHeading.appendChild(titleLink);
-        // Create a <p> element for the snippet
-        const snippetParagraph = document.createElement("p");
-        snippetParagraph.textContent = result.htmlSnippet;
-        // Create another <a> element
-        const link = document.createElement("a");
-        link.href = result.htmlFormattedUrl;
-        link.target = "_blank";
-        link.textContent = result.displayLink;
-        // Append the created elements to the cardContent
-        cardContent.appendChild(titleHeading);
-        cardContent.appendChild(snippetParagraph);
-        cardContent.appendChild(link);
-        // Append the cardContent to the 'card' element
-        card.appendChild(cardContent);
-        column.appendChild(card);
-    });
-}
-function displayGitHubResults(results, source) {
-    const column = (0, _displayUI.createContainer)(source);
-    if (results.length === 0) {
-        column.classList.add("has-error");
-        const cardBody = column.querySelector(".card-body");
-        const textNode = document.createTextNode("No results found.");
-        cardBody.appendChild(textNode);
-        return;
-    }
-    results.forEach((result)=>{
-        const card = document.createElement("div");
-        card.className = "result-card";
-        let language = result.language ? "Language: " + result.language : "";
-        // Create a new <div> element
-        const cardContent = document.createElement("div");
-        // Create the <p> element for the link
-        const linkParagraph = document.createElement("p");
-        const link = document.createElement("a");
-        link.href = result.html_url;
-        link.target = "_blank";
-        link.textContent = result.full_name;
-        linkParagraph.appendChild(link);
-        // Create the <p> element for the description
-        const descriptionParagraph = document.createElement("p");
-        descriptionParagraph.textContent = result.description;
-        // Create the <p> element for the language
-        const languageParagraph = document.createElement("p");
-        const small = document.createElement("small");
-        small.textContent = language;
-        languageParagraph.appendChild(small);
-        // Append the created elements to the cardContent
-        cardContent.appendChild(linkParagraph);
-        cardContent.appendChild(descriptionParagraph);
-        cardContent.appendChild(languageParagraph);
-        // Append the cardContent to the 'card' element
-        card.appendChild(cardContent);
-        column.appendChild(card);
-    });
-}
-
-},{"./displayUI":"gTqOq","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gTqOq":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "createContainer", ()=>createContainer);
-parcelHelpers.export(exports, "displayError", ()=>displayError);
-var _iconYoutubePng = require("../images/icon-youtube.png");
-var _iconYoutubePngDefault = parcelHelpers.interopDefault(_iconYoutubePng);
-var _iconStackoverflowPng = require("../images/icon-stackoverflow.png");
-var _iconStackoverflowPngDefault = parcelHelpers.interopDefault(_iconStackoverflowPng);
-var _iconGooglePng = require("../images/icon-google.png");
-var _iconGooglePngDefault = parcelHelpers.interopDefault(_iconGooglePng);
-var _iconGithubPng = require("../images/icon-github.png");
-var _iconGithubPngDefault = parcelHelpers.interopDefault(_iconGithubPng);
-function generateCardHeader(headerImg, source) {
-    // Create a div, image, and title element
-    const cardHeader = document.createElement("div");
-    cardHeader.className = "card-header";
-    const img = document.createElement("img");
-    img.src = headerImg;
-    const title = document.createElement("h2");
-    title.textContent = source;
-    cardHeader.appendChild(img);
-    cardHeader.appendChild(title);
-    return cardHeader;
-}
-function createContainer(source) {
-    const resultsContainer = document.getElementById("resultsContainer");
-    const columnClass = source.toLowerCase().replace(/\s/g, "") + "-column";
-    const childColumn = resultsContainer.querySelector("." + columnClass);
-    if (childColumn) return childColumn; // Return is child already exists
-    const column = document.createElement("div");
-    column.className = columnClass + " result-column";
-    const cardBody = document.createElement("div");
-    cardBody.className = "card-body";
-    let headerImg = "";
-    switch(source){
-        case "YouTube":
-            headerImg = (0, _iconYoutubePngDefault.default);
-            break;
-        case "Stack Overflow":
-            headerImg = (0, _iconStackoverflowPngDefault.default);
-            break;
-        case "Google":
-            headerImg = (0, _iconGooglePngDefault.default);
-            break;
-        case "GitHub":
-            headerImg = (0, _iconGithubPngDefault.default);
-            break;
-        default:
-            console.log(source);
-    }
-    const cardHeader = generateCardHeader(headerImg, source);
-    column.appendChild(cardHeader);
-    column.appendChild(cardBody);
-    resultsContainer.appendChild(column);
-    return column;
-}
-function displayError(source) {
-    const column = createContainer(source);
-    column.classList.add("has-error");
-    const cardBody = column.querySelector(".card-body");
-    const textNode = document.createTextNode("Some Error has Ocurred. Please try again later.");
-    cardBody.appendChild(textNode);
-}
-
-},{"../images/icon-youtube.png":"jZ2Ee","../images/icon-stackoverflow.png":"2uH0f","../images/icon-google.png":"kHiKk","../images/icon-github.png":"4xgkS","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jZ2Ee":[function(require,module,exports) {
-module.exports = require("d4665ecf6757f212").getBundleURL("10Mjw") + "icon-youtube.20193d2e.png" + "?" + Date.now();
-
-},{"d4665ecf6757f212":"lgJ39"}],"lgJ39":[function(require,module,exports) {
-"use strict";
-var bundleURL = {};
-function getBundleURLCached(id) {
-    var value = bundleURL[id];
-    if (!value) {
-        value = getBundleURL();
-        bundleURL[id] = value;
-    }
-    return value;
-}
-function getBundleURL() {
-    try {
-        throw new Error();
-    } catch (err) {
-        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
-        if (matches) // The first two stack frames will be this function and getBundleURLCached.
-        // Use the 3rd one, which will be a runtime in the original bundle.
-        return getBaseURL(matches[2]);
-    }
-    return "/";
-}
-function getBaseURL(url) {
-    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
-}
-// TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
-function getOrigin(url) {
-    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
-    if (!matches) throw new Error("Origin not found");
-    return matches[0];
-}
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-exports.getOrigin = getOrigin;
-
-},{}],"2uH0f":[function(require,module,exports) {
-module.exports = require("521483d2b91fd2b2").getBundleURL("10Mjw") + "icon-stackoverflow.823e1f81.png" + "?" + Date.now();
-
-},{"521483d2b91fd2b2":"lgJ39"}],"kHiKk":[function(require,module,exports) {
-module.exports = require("3f705dc280eda790").getBundleURL("10Mjw") + "icon-google.1ec244d5.png" + "?" + Date.now();
-
-},{"3f705dc280eda790":"lgJ39"}],"4xgkS":[function(require,module,exports) {
-module.exports = require("9f8d874a161d71eb").getBundleURL("10Mjw") + "icon-github.4e196431.png" + "?" + Date.now();
-
-},{"9f8d874a161d71eb":"lgJ39"}],"gkKU3":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, "__esModule", {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
 
 },{}]},["gEwwu","1SICI"], "1SICI", "parcelRequire00da")
 

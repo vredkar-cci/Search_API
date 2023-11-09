@@ -2,9 +2,9 @@ import { createContainer } from "../displayUI";
 
 function displayStackOverflowResults(results, source) {
   const column = createContainer(source);
+  const cardBody = column.querySelector('.card-body');
   if (results.length === 0) {
     column.classList.add("has-error");
-    const cardBody = column.querySelector('.card-body');
     const textNode = document.createTextNode('No results found.');
     cardBody.appendChild(textNode);
     return;
@@ -55,7 +55,7 @@ function displayStackOverflowResults(results, source) {
     card.appendChild(infoDiv);
     card.appendChild(mainContentDiv);
 
-    column.appendChild(card);
+    cardBody.appendChild(card);
   });
 }
 

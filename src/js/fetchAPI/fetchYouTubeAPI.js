@@ -1,7 +1,7 @@
 import { displayYouTubeResults } from '../handleResult/YouTubeResult';
 import { displayError } from "../displayUI";
 
-const maxResults = process.env.MaxResults; //Max number of results
+import { maxResults } from "../main";
 
 // Function to fetch data from YouTube API
 async function searchYouTube(keyword, source) {

@@ -5,6 +5,8 @@ import { searchGitHub } from "./fetchAPI/fetchGitHubAPI";
 
 require('dotenv').config();
 
+export const maxResults = process.env.MaxResults; //Max number of results
+
 // Event listener for Enter key press
 document.getElementById('searchField').addEventListener('keyup', function (event) {
   if (event.key === 'Enter') {

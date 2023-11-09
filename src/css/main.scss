@@ -6,6 +6,7 @@ $grey: #767676;
 $grey-light: #d3d3d3;
 $grey-dark: #333;
 $green: #9fba29;
+$green-dark: #2f6f44;
 
 /* Default */
 * {
@@ -106,21 +107,26 @@ header {
     word-break: break-word;
     background-color: $white;
     margin: 20px 0;
+    max-height: 500px;
+    overflow-y: scroll;
 
     @media (min-width: 992px) {
       width: calc(50% - 10px);
       max-height: 400px;
-      overflow-y: scroll;
       margin-bottom: 30px;
     }
 
     .card-header {
-      display: flex;
-      align-items: center;
       padding-bottom: 15px;
       margin-bottom: 20px;
       border-bottom: 2px solid $grey-light;
       width: 100%;
+      a {
+        display: inline-flex;
+        align-items: center;
+        color: $black;
+        text-decoration: none;
+      }
       img {
         max-width: 40px;
       }
@@ -168,8 +174,8 @@ header {
     text-align: right;
     min-width: 90px;
     .ans-count {
-      background-color: #2f6f44;
-      color: white;
+      background-color: $green-dark;
+      color: $white;
       font-size: 12px;
       padding: 3px 5px;
       white-space: nowrap;

@@ -3,19 +3,64 @@ import stackOverflowImg from '../images/icon-stackoverflow.png';
 import googleImg from '../images/icon-google.png';
 import gitHubImg from '../images/icon-github.png';
 
-function generateCardHeader(headerImg, source) {
+let sites = {
+  youtube: {
+    name: "YouTube",
+    logo: youTubeImg,
+    alt: "YouTube logo",
+    url: "https://www.youtube.com"
+  },
+  stackoverflow: {
+    name: "Stack Overflow",
+    logo: stackOverflowImg,
+    alt: "Stack Overflow logo",
+    url: "https://stackoverflow.com"
+  },
+  google: {
+    name: "Google",
+    logo: googleImg,
+    alt: "Google logo",
+    url: "https://www.google.com"
+  },
+  github: {
+    name: "GitHub",
+    logo: gitHubImg,
+    alt: "GitHub logo",
+    url: "https://github.com/"
+  }
+};
+
+function generateCardHeader(source) {
   // Create a div, image, and title element
+  const siteName = source.toLowerCase().replace(/\s/g, '');
+  let headerImg = "",
+      siteURL = "",
+      altText = "";
   const cardHeader = document.createElement('div');
   cardHeader.className = 'card-header';
 
+  // Check if the site with the given name exists in the object
+  if (sites.hasOwnProperty(siteName)) {
+    headerImg = sites[siteName].logo;
+    altText = sites[siteName].alt;
+    siteURL = sites[siteName].url;
+  }
+
   const img = document.createElement('img');
   img.src = headerImg;
+  img.alt = altText;
 
   const title = document.createElement('h2');
   title.textContent = source;
 
-  cardHeader.appendChild(img);
-  cardHeader.appendChild(title);
+  const titleLink = document.createElement('a');
+  titleLink.href = siteURL;
+  titleLink.target = '_blank';
+
+  titleLink.appendChild(img);
+  titleLink.appendChild(title);
+
+  cardHeader.appendChild(titleLink);
 
   return cardHeader;
 }
@@ -24,6 +69,7 @@ function createContainer(source) {
   const resultsContainer = document.getElementById('resultsContainer');
   const columnClass = source.toLowerCase().replace(/\s/g, '') + '-column';
   const childColumn = resultsContainer.querySelector('.' + columnClass);
+
   if (childColumn) {
     return (childColumn);   // Return is child already exists
   }
@@ -32,25 +78,8 @@ function createContainer(source) {
 
   const cardBody = document.createElement('div');
   cardBody.className = 'card-body';
-  let headerImg = '';
-  switch (source) {
-    case 'YouTube':
-      headerImg = youTubeImg;
-      break;
-    case 'Stack Overflow':
-      headerImg = stackOverflowImg;
-      break;
-    case 'Google':
-      headerImg = googleImg;
-      break;
-    case 'GitHub':
-      headerImg = gitHubImg;
-      break;
-    default:
-      console.log(source);
-  }
 
-  const cardHeader = generateCardHeader(headerImg, source);
+  const cardHeader = generateCardHeader(source);
   column.appendChild(cardHeader);
   column.appendChild(cardBody);
 
